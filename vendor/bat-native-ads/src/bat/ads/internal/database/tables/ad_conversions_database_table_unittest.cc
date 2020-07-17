@@ -22,7 +22,7 @@
 #include "bat/ads/internal/ads_impl.h"
 #include "bat/ads/internal/container_util.h"
 #include "bat/ads/internal/database/database_initialize.h"
-#include "bat/ads/internal/unittest_utils.h"
+#include "bat/ads/internal/unittest_util.h"
 
 // npm run test -- brave_unit_tests --filter=BatAds*
 
@@ -324,7 +324,7 @@ TEST_F(BatAdsAdConversionsDatabaseTableTest,
     }
   };
 
-  MockURLRequest(ads_client_mock_, endpoints);
+  MockUrlRequest(ads_client_mock_, endpoints);
 
   Initialize(ads_);
 

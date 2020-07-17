@@ -910,11 +910,12 @@ void RewardsDOMHandler::SaveSetting(const base::ListValue* args) {
 }
 
 void RewardsDOMHandler::UpdateAdsRewards(const base::ListValue* args) {
-  if (!rewards_service_) {
+  if (!ads_service_) {
     return;
   }
 
-  rewards_service_->UpdateAdsRewards();
+  // TODO(tmancey): Implement
+  // ads_service_->UpdateAdsRewards();
 }
 
 void RewardsDOMHandler::ExcludePublisher(const base::ListValue *args) {
@@ -1425,7 +1426,7 @@ void RewardsDOMHandler::OnPublisherListNormalized(
 
 void RewardsDOMHandler::GetTransactionHistory(
     const base::ListValue* args) {
-  rewards_service_->GetTransactionHistory(base::Bind(
+  ads_service_->GetTransactionHistory(base::Bind(
       &RewardsDOMHandler::OnTransactionHistory,
       weak_factory_.GetWeakPtr()));
 }

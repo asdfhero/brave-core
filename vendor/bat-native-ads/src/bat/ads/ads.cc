@@ -3,13 +3,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "bat/ads/ads.h"
+
 #include <algorithm>
 #include <set>
 
-#include "bat/ads/ads.h"
-
 #include "bat/ads/internal/ads_impl.h"
-#include "bat/ads/internal/supported_country_codes.h"
+#include "bat/ads/internal/locale/supported_country_codes.h"
 #include "brave/components/l10n/common/locale_util.h"
 
 namespace ads {

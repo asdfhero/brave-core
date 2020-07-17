@@ -10,6 +10,7 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/containers/flat_map.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/path_service.h"
@@ -29,6 +30,7 @@
 #include "bat/ads/ads_history.h"
 #include "bat/ads/ad_notification_info.h"
 #include "bat/ads/mojom.h"
+#include "bat/ads/transactions_info.h"
 #include "bat/ads/resources/grit/bat_ads_resources.h"
 #include "brave/components/brave_ads/browser/ad_notification.h"
 #include "brave/components/brave_ads/browser/ads_notification_handler.h"
@@ -111,17 +113,17 @@ int GetSchemaResourceId(
 }
 
 std::string URLMethodToRequestType(
-    ads::URLRequestMethod method) {
+    ads::UrlRequestMethod method) {
   switch (method) {
-    case ads::URLRequestMethod::GET: {
+    case ads::UrlRequestMethod::GET: {
       return "GET";
     }
 
-    case ads::URLRequestMethod::POST: {
+    case ads::UrlRequestMethod::POST: {
       return "POST";
     }
 
-    case ads::URLRequestMethod::PUT: {
+    case ads::UrlRequestMethod::PUT: {
       return "PUT";
     }
   }
@@ -225,6 +227,12 @@ AdsServiceImpl::AdsServiceImpl(Profile* profile) :
   profile_pref_change_registrar_.Add(prefs::kIdleThreshold,
       base::Bind(&AdsServiceImpl::OnPrefsChanged, base::Unretained(this)));
 
+  profile_pref_change_registrar_.Add(brave_rewards::prefs::kStatePaymentId,
+      base::Bind(&AdsServiceImpl::OnPrefsChanged, base::Unretained(this)));
+
+  profile_pref_change_registrar_.Add(brave_rewards::prefs::kStateRecoverySeed,
+      base::Bind(&AdsServiceImpl::OnPrefsChanged, base::Unretained(this)));
+
 #if !defined(OS_ANDROID)
   // TODO(tmancey): Refactor on-boarding to be platform agnostic
   MaybeShowOnboarding();
@@ -321,15 +329,6 @@ void AdsServiceImpl::SetAutomaticallyDetectedAdsSubdivisionTargetingCode(
       subdivision_targeting_code);
 }
 
-void AdsServiceImpl::SetConfirmationsIsReady(
-    const bool is_ready) {
-  if (!connected()) {
-    return;
-  }
-
-  bat_ads_->SetConfirmationsIsReady(is_ready);
-}
-
 void AdsServiceImpl::ChangeLocale(
     const std::string& locale) {
   if (!connected()) {
@@ -390,6 +389,19 @@ void AdsServiceImpl::OnTabClosed(
   bat_ads_->OnTabClosed(tab_id.id());
 }
 
+void AdsServiceImpl::OnWalletUpdated() {
+  if (!connected()) {
+    return;
+  }
+
+  const std::string payment_id =
+      profile_->GetPrefs()->GetString(brave_rewards::prefs::kStatePaymentId);
+  const std::string recovery_seed_base64 =
+      profile_->GetPrefs()->GetString(brave_rewards::prefs::kStateRecoverySeed);
+
+  bat_ads_->OnWalletUpdated(payment_id, recovery_seed_base64);
+}
+
 void AdsServiceImpl::GetAdsHistory(
     const uint64_t from_timestamp,
     const uint64_t to_timestamp,
@@ -401,6 +413,17 @@ void AdsServiceImpl::GetAdsHistory(
   bat_ads_->GetAdsHistory(from_timestamp, to_timestamp,
       base::BindOnce(&AdsServiceImpl::OnGetAdsHistory, AsWeakPtr(),
           std::move(callback)));
+}
+
+void AdsServiceImpl::GetTransactionHistory(
+    GetTransactionHistoryCallback callback) {
+  if (!connected()) {
+    return;
+  }
+
+  bat_ads_->GetTransactionHistory(
+      base::BindOnce(&AdsServiceImpl::OnGetTransactionHistory,
+          AsWeakPtr(), std::move(callback)));
 }
 
 void AdsServiceImpl::ToggleAdThumbUp(
@@ -674,6 +697,8 @@ void AdsServiceImpl::OnEnsureBaseDirectoryExists(
       bat_ads_.BindNewEndpointAndPassReceiver(),
       base::BindOnce(&AdsServiceImpl::OnCreate, AsWeakPtr()));
 
+  OnWalletUpdated();
+
   const std::string locale = GetLocale();
   RegisterUserModelComponentsForLocale(locale);
 
@@ -913,7 +938,7 @@ void AdsServiceImpl::OnURLRequestStarted(
 
 void AdsServiceImpl::OnURLRequestComplete(
     network::SimpleURLLoader* url_loader,
-    ads::URLRequestCallback callback,
+    ads::UrlRequestCallback callback,
     const std::unique_ptr<std::string> response_body) {
   DCHECK(url_loaders_.find(url_loader) != url_loaders_.end());
   url_loaders_.erase(url_loader);
@@ -924,7 +949,7 @@ void AdsServiceImpl::OnURLRequestComplete(
 
   int response_code = -1;
 
-  std::map<std::string, std::string> headers;
+  base::flat_map<std::string, std::string> headers;
 
   if (!url_loader->ResponseInfo()) {
     VLOG(6) << "ResponseInfo was never received";
@@ -948,7 +973,13 @@ void AdsServiceImpl::OnURLRequestComplete(
     }
   }
 
-  callback(response_code, response_body ? *response_body : "", headers);
+  ads::UrlResponse response;
+  response.url = url_loader->GetFinalURL().spec();
+  response.status_code = response_code;
+  response.body = response_body ? *response_body : "";
+  response.headers = headers;
+
+  callback(response);
 }
 
 bool AdsServiceImpl::CanShowBackgroundNotifications() const {
@@ -1017,6 +1048,17 @@ void AdsServiceImpl::OnGetAdsHistory(
   }
 
   std::move(callback).Run(list);
+}
+
+void AdsServiceImpl::OnGetTransactionHistory(
+    GetTransactionHistoryCallback callback,
+    const std::string& json) {
+  ads::TransactionsInfo transactions;
+  transactions.FromJson(json);
+
+  std::move(callback).Run(transactions.estimated_pending_rewards,
+      transactions.next_payment_date_in_seconds,
+          transactions.ad_notifications_received_this_month);
 }
 
 void AdsServiceImpl::OnRemoveAllHistory(
@@ -1768,6 +1810,9 @@ void AdsServiceImpl::OnPrefsChanged(
     brave_rewards::UpdateAdsP3AOnPreferenceChange(profile_->GetPrefs(), pref);
   } else if (pref == prefs::kIdleThreshold) {
     StartCheckIdleStateTimer();
+  } else if (pref == brave_rewards::prefs::kStatePaymentId ||
+      pref == brave_rewards::prefs::kStateRecoverySeed) {
+    OnWalletUpdated();
   }
 }
 
@@ -1776,21 +1821,6 @@ bool AdsServiceImpl::connected() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void AdsServiceImpl::GetClientInfo(ads::ClientInfo* client_info) const {
-#if defined(OS_MACOSX)
-  client_info->platform = ads::ClientInfoPlatformType::MACOS;
-#elif defined(OS_WIN)
-  client_info->platform = ads::ClientInfoPlatformType::WINDOWS;
-#elif defined(OS_LINUX)
-  client_info->platform = ads::ClientInfoPlatformType::LINUX;
-#elif defined(OS_ANDROID)
-  client_info->platform = ads::ClientInfoPlatformType::ANDROID_OS;
-#else
-  NOTREACHED();
-  client_info->platform = ads::ClientInfoPlatformType::UNKNOWN;
-#endif
-}
 
 bool AdsServiceImpl::IsNetworkConnectionAvailable() const {
   return !net::NetworkChangeNotifier::IsOffline();
@@ -1883,37 +1913,14 @@ void AdsServiceImpl::CloseNotification(
   display_service_->Close(NotificationHandler::Type::BRAVE_ADS, uuid);
 }
 
-void AdsServiceImpl::SetCatalogIssuers(
-    const std::unique_ptr<ads::IssuersInfo> info) {
-  rewards_service_->SetCatalogIssuers(info->ToJson());
-}
-
-void AdsServiceImpl::ConfirmAd(
-    const ads::AdInfo& info,
-    const ads::ConfirmationType confirmation_type) {
-  rewards_service_->ConfirmAd(info.ToJson(), confirmation_type);
-}
-
-void AdsServiceImpl::ConfirmAction(
-    const std::string& creative_instance_id,
-    const std::string& creative_set_id,
-    const ads::ConfirmationType confirmation_type) {
-  rewards_service_->ConfirmAction(creative_instance_id, creative_set_id,
-      confirmation_type);
-}
-
-void AdsServiceImpl::URLRequest(
-      const std::string& url,
-      const std::vector<std::string>& headers,
-      const std::string& content,
-      const std::string& content_type,
-      const ads::URLRequestMethod method,
-      ads::URLRequestCallback callback) {
+void AdsServiceImpl::UrlRequest(
+      ads::UrlRequestPtr request,
+      ads::UrlRequestCallback callback) {
   auto resource_request = std::make_unique<network::ResourceRequest>();
-  resource_request->url = GURL(url);
-  resource_request->method = URLMethodToRequestType(method);
+  resource_request->url = GURL(request->url);
+  resource_request->method = URLMethodToRequestType(request->method);
   resource_request->credentials_mode = network::mojom::CredentialsMode::kOmit;
-  for (const auto& header : headers) {
+  for (const auto& header : request->headers) {
     resource_request->headers.AddHeaderFromString(header);
   }
 
@@ -1921,8 +1928,8 @@ void AdsServiceImpl::URLRequest(
       network::SimpleURLLoader::Create(std::move(resource_request),
           GetNetworkTrafficAnnotationTag()).release();
 
-  if (!content.empty()) {
-    url_loader->AttachStringForUpload(content, content_type);
+  if (!request->content.empty()) {
+    url_loader->AttachStringForUpload(request->content, request->content_type);
   }
 
   url_loader->SetOnResponseStartedCallback(base::BindOnce(

@@ -88,12 +88,6 @@ class AdsClientMojoBridge
   void LoadResourceForId(
       const std::string& id,
       LoadResourceForIdCallback callback) override;
-  bool GetClientInfo(
-      const std::string& client_info,
-      std::string* out_client_info) override;
-  void GetClientInfo(
-      const std::string& client_info,
-      GetClientInfoCallback callback) override;
   void Log(
       const std::string& file,
       const int32_t line,
@@ -114,26 +108,13 @@ class AdsClientMojoBridge
   void Reset(
       const std::string& name,
       ResetCallback callback) override;
-  void URLRequest(
-      const std::string& url,
-      const std::vector<std::string>& headers,
-      const std::string& content,
-      const std::string& content_type,
-      const int32_t method,
-      URLRequestCallback callback) override;
+  void UrlRequest(
+      ads::UrlRequestPtr request,
+      UrlRequestCallback callback) override;
   void ShowNotification(
       const std::string& notification_info) override;
   void CloseNotification(
       const std::string& uuid) override;
-  void SetCatalogIssuers(
-      const std::string& issuers_info) override;
-  void ConfirmAd(
-      const std::string& json,
-      const std::string& confirmation_type) override;
-  void ConfirmAction(
-      const std::string& creative_instance_id,
-      const std::string& creative_set_id,
-      const std::string& confirmation_type) override;
   void RunDBTransaction(
       ads::DBTransactionPtr transaction,
       RunDBTransactionCallback callback) override;
@@ -183,10 +164,8 @@ class AdsClientMojoBridge
       const ads::Result result);
 
   static void OnURLRequest(
-      CallbackHolder<URLRequestCallback>* holder,
-      const int response_status_code,
-      const std::string& content,
-      const std::map<std::string, std::string>& headers);
+      CallbackHolder<UrlRequestCallback>* holder,
+      const ads::UrlResponse& response);
 
   static void OnRunDBTransaction(
       CallbackHolder<RunDBTransactionCallback>* holder,
@@ -197,4 +176,4 @@ class AdsClientMojoBridge
 
 }  // namespace bat_ads
 
-#endif  // BRAVE_COMPONENTS_SERVICES_BAT_ADS_PUBLIC_CPP_ADS_CLIENT_MOJO_BRIDGE_H_  // NOLINT
+#endif  // BRAVE_COMPONENTS_SERVICES_BAT_ADS_PUBLIC_CPP_ADS_CLIENT_MOJO_BRIDGE_H_

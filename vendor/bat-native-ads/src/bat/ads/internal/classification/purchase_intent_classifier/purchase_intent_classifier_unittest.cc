@@ -5,16 +5,17 @@
 
 #include "bat/ads/internal/classification/purchase_intent_classifier/purchase_intent_classifier.h"
 
-#include <memory>
+#include <stdint.h>
 
-#include "base/time/time.h"
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "testing/gtest/include/gtest/gtest.h"
 #include "bat/ads/internal/ads_impl.h"
 #include "bat/ads/internal/ads_client_mock.h"
 #include "bat/ads/internal/static_values.h"
 #include "bat/ads/internal/time_util.h"
-
-using ::testing::_;
 
 // npm run test -- brave_unit_tests --filter=BatAds*
 

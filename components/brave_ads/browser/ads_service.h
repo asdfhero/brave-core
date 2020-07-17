@@ -41,6 +41,8 @@ using OnToggleSaveAdCallback =
     base::OnceCallback<void(const std::string&, bool)>;
 using OnToggleFlagAdCallback =
     base::OnceCallback<void(const std::string&, bool)>;
+using GetTransactionHistoryCallback =
+    base::OnceCallback<void(double, uint64_t, uint64_t)>;
 
 class AdsService : public KeyedService {
  public:
@@ -77,9 +79,6 @@ class AdsService : public KeyedService {
   virtual void SetAutomaticallyDetectedAdsSubdivisionTargetingCode(
       const std::string& subdivision_targeting_code) = 0;
 
-  virtual void SetConfirmationsIsReady(
-      const bool is_ready) = 0;
-
   virtual void ChangeLocale(
       const std::string& locale) = 0;
 
@@ -103,6 +102,9 @@ class AdsService : public KeyedService {
       const uint64_t from_timestamp,
       const uint64_t to_timestamp,
       OnGetAdsHistoryCallback callback) = 0;
+
+  virtual void GetTransactionHistory(
+      GetTransactionHistoryCallback callback) = 0;
 
   virtual void ToggleAdThumbUp(
       const std::string& creative_instance_id,

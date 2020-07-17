@@ -16,7 +16,7 @@
 #include "bat/ads/internal/classification/purchase_intent_classifier/purchase_intent_signal_info.h"
 #include "bat/ads/internal/classification/purchase_intent_classifier/segment_keyword_info.h"
 #include "bat/ads/internal/classification/purchase_intent_classifier/site_info.h"
-#include "bat/ads/internal/search_providers.h"
+#include "bat/ads/internal/search_engine/search_providers.h"
 
 namespace ads {
 namespace classification {

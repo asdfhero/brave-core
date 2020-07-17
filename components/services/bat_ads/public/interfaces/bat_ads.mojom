@@ -29,8 +29,6 @@ interface BatAdsClient {
   [Sync]
   IsNetworkConnectionAvailable() => (bool available);
   [Sync]
-  GetClientInfo(string client_info) => (string client_info);
-  [Sync]
   IsForeground() => (bool is_foreground);
   [Sync]
   ShouldShowNotifications() => (bool should_show);
@@ -51,10 +49,7 @@ interface BatAdsClient {
   SetIdleThreshold(int32 threshold);
   ShowNotification(string notification_info);
   CloseNotification(string uuid);
-  SetCatalogIssuers(string issuers_info);
-  ConfirmAd(string json, string confirmation_type);
-  ConfirmAction(string creative_instance_id, string creative_set_id, string confirmation_type);
-  URLRequest(string url, array<string> headers, string content, string content_type, int32 method) => (int32 status_code, string content, map<string, string> headers);
+  UrlRequest(ads.mojom.UrlRequest request) => (ads.mojom.UrlResponse response);
   Save(string name, string value) => (int32 result);
   LoadUserModelForId(string id) => (int32 result, string value);
   Load(string name) => (int32 result, string value);
@@ -66,10 +61,9 @@ interface BatAdsClient {
 interface BatAds {
   Initialize() => (int32 result);
   Shutdown() => (int32 result);
-  SetConfirmationsIsReady(bool is_ready);
   ChangeLocale(string locale);
   OnAdsSubdivisionTargetingCodeHasChanged();
-  OnPageLoaded(string url, string html);
+  OnPageLoaded(string url, string content);
   OnUnIdle();
   OnIdle();
   OnForeground();
@@ -78,10 +72,12 @@ interface BatAds {
   OnMediaStopped(int32 tab_id);
   OnTabUpdated(int32 tab_id, string url, bool is_active, bool is_incognito);
   OnTabClosed(int32 tab_id);
+  OnWalletUpdated(string payment_id, string recovery_seed_base64);
   GetAdNotification(string uuid) => (string json);
   OnAdNotificationEvent(string uuid, ads.mojom.AdNotificationEventType event_type);
   RemoveAllHistory() => (int32 result);
   GetAdsHistory(uint64 from_timestamp, uint64 to_timestamp) => (string json);
+  GetTransactionHistory() => (string json);
   ToggleAdThumbUp(string creative_instance_id, string creative_set_id, int32 action) => (string creative_instance_id, int32 action);
   ToggleAdThumbDown(string creative_instance_id, string creative_set_id, int32 action) => (string creative_instance_id, int32 action);
   ToggleAdOptInAction(string category, int32 action) => (string category, int32 action);

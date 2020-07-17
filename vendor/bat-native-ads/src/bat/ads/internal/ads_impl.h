@@ -7,44 +7,58 @@
 #define BAT_ADS_INTERNAL_ADS_IMPL_H_
 
 #include <stdint.h>
-#include <string>
+
 #include <map>
-#include <vector>
-#include <deque>
 #include <memory>
 #include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "bat/ads/ads.h"
-#include "bat/ads/ads_history.h"
-#include "bat/ads/mojom.h"
+#include "base/values.h"
 #include "bat/ads/ad_notification_info.h"
-#include "bat/ads/internal/ads_serve.h"
-#include "bat/ads/internal/bundle.h"
+#include "bat/ads/ads_history.h"
+#include "bat/ads/ads.h"
+#include "bat/ads/confirmation_type.h"
+#include "bat/ads/internal/ad_notifications/ad_notifications.h"
+#include "bat/ads/internal/bundle/bundle.h"
+#include "bat/ads/internal/bundle/creative_ad_notification_info.h"
+#include "bat/ads/internal/catalog/catalog_issuers_info.h"
 #include "bat/ads/internal/classification/page_classifier/page_classifier.h"
 #include "bat/ads/internal/classification/purchase_intent_classifier/purchase_intent_classifier.h"
-#include "bat/ads/internal/client.h"
-#include "bat/ads/internal/creative_ad_notification_info.h"
+#include "bat/ads/internal/classification/purchase_intent_classifier/purchase_intent_signal_info.h"
+#include "bat/ads/internal/client/client.h"
+#include "bat/ads/internal/confirmations/confirmation_info.h"
+#include "bat/ads/internal/confirmations/confirmations.h"
 #include "bat/ads/internal/database/database_initialize.h"
 #include "bat/ads/internal/database/tables/creative_ad_notifications_database_table.h"
-#include "bat/ads/internal/ad_conversions.h"
-#include "bat/ads/internal/ad_notification_result_type.h"
-#include "bat/ads/internal/ad_notifications.h"
+#include "bat/ads/internal/privacy/unblinded_tokens/unblinded_tokens.h"
+#include "bat/ads/internal/server/ad_rewards/ad_rewards.h"
+#include "bat/ads/internal/server/get_catalog/get_catalog.h"
+#include "bat/ads/internal/server/redeem_unblinded_payment_tokens/redeem_unblinded_payment_tokens_delegate.h"
+#include "bat/ads/internal/server/redeem_unblinded_payment_tokens/redeem_unblinded_payment_tokens.h"
+#include "bat/ads/internal/server/redeem_unblinded_token/redeem_unblinded_token_delegate.h"
+#include "bat/ads/internal/server/redeem_unblinded_token/redeem_unblinded_token.h"
+#include "bat/ads/internal/server/refill_unblinded_tokens/refill_unblinded_tokens_delegate.h"
+#include "bat/ads/internal/server/refill_unblinded_tokens/refill_unblinded_tokens.h"
 #include "bat/ads/internal/timer.h"
+#include "bat/ads/internal/wallet_info.h"
+#include "bat/ads/mojom.h"
 
 namespace ads {
 
-class Client;
-class Bundle;
-class AdsServe;
-class SubdivisionTargeting;
-class AdNotifications;
 class AdConversions;
+class AdNotifications;
 class ExclusionRule;
+class GetCatalog;
 class PermissionRule;
-class PurchaseIntentClassifier;
-struct PurchaseIntentSignalInfo;
+class SubdivisionTargeting;
 
-class AdsImpl : public Ads {
+class AdsImpl
+    : public Ads,
+      public RedeemUnblindedPaymentTokensDelegate,
+      public RedeemUnblindedTokenDelegate,
+      public RefillUnblindedTokensDelegate {
  public:
   explicit AdsImpl(
       AdsClient* ads_client);
@@ -52,10 +66,16 @@ class AdsImpl : public Ads {
 
   AdsClient* get_ads_client() const;
   Client* get_client() const;
+  Confirmations* get_confirmations() const;
+  AdRewards* get_ad_rewards() const;
   AdNotifications* get_ad_notifications() const;
   SubdivisionTargeting* get_subdivision_targeting() const;
   AdConversions* get_ad_conversions() const;
   classification::PageClassifier* get_page_classifier() const;
+  privacy::UnblindedTokens* get_unblinded_tokens() const;
+  privacy::UnblindedTokens* get_unblinded_payment_tokens() const;
+  RedeemUnblindedPaymentTokens* get_redeem_unblinded_payment_tokens();
+  Bundle* get_bundle() const;
 
   InitializeCallback initialize_callback_;
   void Initialize(
@@ -70,13 +90,12 @@ class AdsImpl : public Ads {
       const Result result);
   void InitializeStep6(
       const Result result);
+  void InitializeStep7(
+      const Result result);
   bool IsInitialized();
 
   void Shutdown(
       ShutdownCallback callback) override;
-
-  bool IsMobile() const;
-  bool IsAndroid() const;
 
   bool is_foreground_;
   void OnForeground() override;
@@ -113,11 +132,12 @@ class AdsImpl : public Ads {
   void OnTabClosed(
       const int32_t tab_id) override;
 
+  void OnWalletUpdated(
+      const std::string& payment_id,
+      const std::string& private_key) override;
+
   void RemoveAllHistory(
       RemoveAllHistoryCallback callback) override;
-
-  void SetConfirmationsIsReady(
-      const bool is_ready) override;
 
   AdsHistory GetAdsHistory(
       const AdsHistory::FilterType filter_type,
@@ -189,8 +209,7 @@ class AdsImpl : public Ads {
 
   void MaybeServeAdNotification(
       const bool should_serve);
-  void ServeAdNotificationIfReady(
-      const bool should_force);
+  void ServeAdNotificationIfReady();
   void ServeAdNotificationFromCategories(
       const classification::CategoryList& categories);
   void OnServeAdNotificationFromCategories(
@@ -251,18 +270,52 @@ class AdsImpl : public Ads {
       const std::string& creative_set_id,
       const ConfirmationType confirmation_type);
 
-  uint64_t next_easter_egg_timestamp_in_seconds_;
-
   void AppendAdNotificationToHistory(
       const AdNotificationInfo& info,
       const ConfirmationType& confirmation_type);
 
-  bool IsSupportedUrl(
-      const std::string& url) const;
+  // Catalog issuers
+  double GetEstimatedRedemptionValue(
+      const std::string& public_key) const;
+
+  // Confirmations
+  void StartRetryingFailedConfirmations();
+
+  // Ads rewards
+  void UpdateAdsRewards(
+      const bool should_refresh) override;
+
+  void UpdateAdsRewards(
+      const double estimated_pending_rewards,
+      const uint64_t next_payment_date_in_seconds);
+
+  // Transaction history
+  void GetTransactionHistory(
+      GetTransactionHistoryCallback callback) override;
+  void AddUnredeemedTransactionsToPendingRewards();
+  void AddTransactionsToPendingRewards(
+      const TransactionList& transactions);
+  double GetEstimatedPendingRewardsForTransactions(
+      const TransactionList& transactions) const;
+  uint64_t GetAdNotificationsReceivedThisMonthForTransactions(
+      const TransactionList& transactions) const;
+  TransactionList GetTransactionHistory(
+      const uint64_t from_timestamp_in_seconds,
+      const uint64_t to_timestamp_in_seconds);
+  TransactionList GetUnredeemedTransactions();
+
+  // Refill tokens
+  void StartRetryingToGetRefillSignedTokens(
+      const uint64_t start_timer_in);
+  void RefillUnblindedTokensIfNecessary() const;
+
+  // Payout tokens
+  uint64_t GetNextTokenRedemptionDateInSeconds() const;
 
   std::unique_ptr<Client> client_;
+  std::unique_ptr<Confirmations> confirmations_;
   std::unique_ptr<Bundle> bundle_;
-  std::unique_ptr<AdsServe> ads_serve_;
+  std::unique_ptr<GetCatalog> get_catalog_;
   std::unique_ptr<SubdivisionTargeting> subdivision_targeting_;
   std::unique_ptr<AdConversions> ad_conversions_;
   std::unique_ptr<database::Initialize> database_;
@@ -272,8 +325,6 @@ class AdsImpl : public Ads {
 
  private:
   bool is_initialized_;
-
-  bool is_confirmations_ready_;
 
   AdNotificationInfo last_shown_ad_notification_;
   CreativeAdNotificationInfo last_shown_creative_ad_notification_;
@@ -290,6 +341,41 @@ class AdsImpl : public Ads {
   std::vector<std::unique_ptr<PermissionRule>> CreatePermissionRules() const;
 
   std::vector<std::unique_ptr<ExclusionRule>> CreateExclusionRules() const;
+
+  // Wallet
+  WalletInfo wallet_;
+
+  // Confirmations
+  Timer failed_confirmations_timer_;
+  void RetryFailedConfirmations();
+
+  // Ads rewards
+  double estimated_pending_rewards_;
+  uint64_t next_payment_date_in_seconds_;
+  std::unique_ptr<AdRewards> ad_rewards_;
+
+  std::unique_ptr<RefillUnblindedTokens> refill_unblinded_tokens_;
+
+  std::unique_ptr<RedeemUnblindedToken> redeem_unblinded_token_;
+
+  std::unique_ptr<RedeemUnblindedPaymentTokens>
+      redeem_unblinded_payment_tokens_;
+
+  // RedeemTokenDelegate implementation
+  void OnDidRedeemUnblindedToken(
+      const ConfirmationInfo& confirmation) override;
+  void OnFailedToRedeemUnblindedToken(
+      const ConfirmationInfo& confirmation) override;
+
+  // RedeemUnblindedPaymentTokensDelegate implementation
+  void OnDidRedeemUnblindedPaymentTokens() override;
+  void OnFailedToRedeemUnblindedPaymentTokens() override;
+  void OnDidRetryRedeemingUnblindedPaymentTokens() override;
+
+  // RefillUnblindedTokensDelegate implementation
+  void OnDidRefillUnblindedTokens() override;
+  void OnFailedToRefillUnblindedTokens() override;
+  void OnDidRetryRefillingUnblindedTokens() override;
 
   // Not copyable, not assignable
   AdsImpl(const AdsImpl&) = delete;

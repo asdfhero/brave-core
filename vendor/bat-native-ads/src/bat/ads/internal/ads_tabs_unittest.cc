@@ -12,7 +12,7 @@
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "bat/ads/internal/ads_client_mock.h"
-#include "bat/ads/internal/unittest_utils.h"
+#include "bat/ads/internal/unittest_util.h"
 
 using ::testing::_;
 using ::testing::NiceMock;

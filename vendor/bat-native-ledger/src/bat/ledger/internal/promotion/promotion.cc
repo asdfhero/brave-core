@@ -453,9 +453,10 @@ void Promotion::OnComplete(
         ConvertPromotionTypeToReportType(promotion->type),
         promotion->approximate_value);
 
-    if (promotion->type == ledger::PromotionType::ADS) {
-      ledger_->UpdateAdsRewards(true);
-    }
+    // TODO(tmancey): Implement
+    // if (promotion->type == ledger::PromotionType::ADS) {
+    //   ledger_->UpdateAdsRewards(true);
+    // }
   }
 
   callback(result, std::move(promotion));

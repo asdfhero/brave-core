@@ -162,7 +162,7 @@ void BraveP3ALogStore::DiscardStagedLog() {
   staged_log_.clear();
 }
 
-void BraveP3ALogStore::PersistUnsentLogs() const {
+void BraveP3ALogStore::TrimAndPersistUnsentLogs() {
   NOTREACHED();
 }
 

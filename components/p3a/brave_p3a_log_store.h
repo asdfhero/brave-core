@@ -59,9 +59,9 @@ class BraveP3ALogStore : public metrics::LogStore {
   // the staged log needs discarded.
   void MarkStagedLogAsSent() override;
 
-  // |PersistUnsentLogs| should not be used, since we persist everything
+  // |TrimAndPersistUnsentLogs| should not be used, since we persist everything
   // on the fly.
-  void PersistUnsentLogs() const override;
+  void TrimAndPersistUnsentLogs() override;
   // Returns early if founds malformed persisted values.
   void LoadPersistedUnsentLogs() override;
 

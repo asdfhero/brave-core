@@ -250,7 +250,11 @@ void UpdateTemplateURLDataKeyword(
 
 // TODO(bsclifton): finish me
 // void LocalizeEngineList(std::vector<BravePrepopulatedEngineID> engines) {
-//   //const auto& it = engines.find(PREPOPULATED_ENGINE_ID_YAHOO);
+//   const auto& it = engines.find(PREPOPULATED_ENGINE_ID_YAHOO);
+//   if (it != engines.end()) {
+//     //..
+//     // replace
+//   }
 // }
 
 // Uses brave_engines_XX localized arrays of engine IDs instead of Chromium's

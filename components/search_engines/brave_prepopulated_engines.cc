@@ -15,10 +15,11 @@ namespace TemplateURLPrepopulateData {
 const int kBraveCurrentDataVersion = 5;
 
 PrepopulatedEngine ModifyEngineParams(const PrepopulatedEngine& engine,
+    const wchar_t* const name,
     const wchar_t* const keyword, const char* const search_url,
     const char* const suggest_url, int id) {
   return {
-    engine.name,
+    name ? name : engine.name,
     keyword ? keyword : engine.keyword,
     engine.favicon_url,
     search_url ? search_url : engine.search_url,
@@ -63,12 +64,14 @@ const PrepopulatedEngine duckduckgo = {
 const PrepopulatedEngine duckduckgo_de = ModifyEngineParams(
   duckduckgo,
   NULL,
+  NULL,
   "https://duckduckgo.com/?q={searchTerms}&t=bravened",
   NULL,
   PREPOPULATED_ENGINE_ID_DUCKDUCKGO_DE);
 
 const PrepopulatedEngine duckduckgo_au_nz_ie = ModifyEngineParams(
   duckduckgo,
+  NULL,
   NULL,
   "https://duckduckgo.com/?q={searchTerms}&t=braveed",
   NULL,
@@ -141,10 +144,12 @@ const PrepopulatedEngine startpage = {
     PREPOPULATED_ENGINE_ID_STARTPAGE,
 };
 
+const wchar_t BRAVE_YAHOO_NAME[] = L"Yahoo";
 const wchar_t BRAVE_YAHOO_KEYWORD[] = L":y";
 
 const PrepopulatedEngine brave_yahoo = ModifyEngineParams(
   yahoo,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   "https://search.yahoo.com/search?p={searchTerms}&fr=brave_yset",
   "https://search.yahoo.com/sugg/chrome"
@@ -153,6 +158,7 @@ const PrepopulatedEngine brave_yahoo = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_ar = ModifyEngineParams(
   yahoo_ar,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -160,6 +166,7 @@ const PrepopulatedEngine brave_yahoo_ar = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_at = ModifyEngineParams(
   yahoo_at,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -167,6 +174,7 @@ const PrepopulatedEngine brave_yahoo_at = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_au = ModifyEngineParams(
   yahoo_au,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -174,6 +182,7 @@ const PrepopulatedEngine brave_yahoo_au = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_br = ModifyEngineParams(
   yahoo_br,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -181,6 +190,7 @@ const PrepopulatedEngine brave_yahoo_br = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_ca = ModifyEngineParams(
   yahoo_ca,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -188,6 +198,7 @@ const PrepopulatedEngine brave_yahoo_ca = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_ch = ModifyEngineParams(
   yahoo_ch,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -195,6 +206,7 @@ const PrepopulatedEngine brave_yahoo_ch = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_cl = ModifyEngineParams(
   yahoo_cl,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -202,6 +214,7 @@ const PrepopulatedEngine brave_yahoo_cl = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_co = ModifyEngineParams(
   yahoo_co,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -209,6 +222,7 @@ const PrepopulatedEngine brave_yahoo_co = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_de = ModifyEngineParams(
   yahoo_de,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -216,6 +230,7 @@ const PrepopulatedEngine brave_yahoo_de = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_dk = ModifyEngineParams(
   yahoo_dk,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -223,6 +238,7 @@ const PrepopulatedEngine brave_yahoo_dk = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_es = ModifyEngineParams(
   yahoo_es,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -230,6 +246,7 @@ const PrepopulatedEngine brave_yahoo_es = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_fi = ModifyEngineParams(
   yahoo_fi,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -237,6 +254,7 @@ const PrepopulatedEngine brave_yahoo_fi = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_fr = ModifyEngineParams(
   yahoo_fr,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -244,6 +262,7 @@ const PrepopulatedEngine brave_yahoo_fr = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_hk = ModifyEngineParams(
   yahoo_hk,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -251,6 +270,7 @@ const PrepopulatedEngine brave_yahoo_hk = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_id = ModifyEngineParams(
   yahoo_id,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -258,6 +278,7 @@ const PrepopulatedEngine brave_yahoo_id = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_in = ModifyEngineParams(
   yahoo_in,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -265,6 +286,7 @@ const PrepopulatedEngine brave_yahoo_in = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_jp = ModifyEngineParams(
   yahoo_jp,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -272,6 +294,7 @@ const PrepopulatedEngine brave_yahoo_jp = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_mx = ModifyEngineParams(
   yahoo_mx,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -279,6 +302,7 @@ const PrepopulatedEngine brave_yahoo_mx = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_my = ModifyEngineParams(
   yahoo_my,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -286,6 +310,7 @@ const PrepopulatedEngine brave_yahoo_my = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_nl = ModifyEngineParams(
   yahoo_nl,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -293,6 +318,7 @@ const PrepopulatedEngine brave_yahoo_nl = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_nz = ModifyEngineParams(
   yahoo_nz,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -300,6 +326,7 @@ const PrepopulatedEngine brave_yahoo_nz = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_pe = ModifyEngineParams(
   yahoo_pe,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -307,6 +334,7 @@ const PrepopulatedEngine brave_yahoo_pe = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_ph = ModifyEngineParams(
   yahoo_ph,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -314,6 +342,7 @@ const PrepopulatedEngine brave_yahoo_ph = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_qc = ModifyEngineParams(
   yahoo_qc,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -321,6 +350,7 @@ const PrepopulatedEngine brave_yahoo_qc = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_se = ModifyEngineParams(
   yahoo_se,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -328,6 +358,7 @@ const PrepopulatedEngine brave_yahoo_se = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_sg = ModifyEngineParams(
   yahoo_sg,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -335,6 +366,7 @@ const PrepopulatedEngine brave_yahoo_sg = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_th = ModifyEngineParams(
   yahoo_th,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -342,6 +374,7 @@ const PrepopulatedEngine brave_yahoo_th = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_tr = ModifyEngineParams(
   yahoo_tr,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -349,6 +382,7 @@ const PrepopulatedEngine brave_yahoo_tr = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_tw = ModifyEngineParams(
   yahoo_tw,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -356,6 +390,7 @@ const PrepopulatedEngine brave_yahoo_tw = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_uk = ModifyEngineParams(
   yahoo_uk,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -363,6 +398,7 @@ const PrepopulatedEngine brave_yahoo_uk = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_ve = ModifyEngineParams(
   yahoo_ve,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,
@@ -370,6 +406,7 @@ const PrepopulatedEngine brave_yahoo_ve = ModifyEngineParams(
 
 const PrepopulatedEngine brave_yahoo_vn = ModifyEngineParams(
   yahoo_vn,
+  BRAVE_YAHOO_NAME,
   BRAVE_YAHOO_KEYWORD,
   0,
   0,

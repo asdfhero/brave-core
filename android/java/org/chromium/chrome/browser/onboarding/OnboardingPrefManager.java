@@ -54,7 +54,7 @@ public class OnboardingPrefManager {
     private static final String QWANT = "Qwant";
     private static final String BING = "Bing";
     private static final String STARTPAGE = "StartPage";
-    private static final String YAHOO = "Yahoo";
+    private static final String YAHOO = "Yahoo!";
 
     private OnboardingPrefManager() {
         mSharedPreferences = ContextUtils.getAppSharedPreferences();

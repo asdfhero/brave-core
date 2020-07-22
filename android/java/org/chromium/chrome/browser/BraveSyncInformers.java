@@ -13,6 +13,7 @@ import org.chromium.base.ContextUtils;
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.Log;
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.util.TabUtils;
 import org.chromium.chrome.browser.ChromeActivity;
 import org.chromium.chrome.browser.infobar.InfoBarIdentifier;
 import org.chromium.chrome.browser.preferences.BravePref;
@@ -46,7 +47,7 @@ public class BraveSyncInformers {
     }
 
     public static void showSyncV1WillBeDeprecated() {
-        ChromeActivity activity = getChromeActivity();
+        ChromeActivity activity = TabUtils.getChromeActivity();
         if (activity == null) return;
 
         Tab tab = activity.getActivityTabProvider().get();
@@ -81,13 +82,5 @@ public class BraveSyncInformers {
                 activity.getString(R.string.learn_more) /* linkText */,
                 false /* autoExpire */);
         BravePrefServiceBridge.getInstance().setBoolean(BravePref.SYNC_DEPRECATION_WARNING_NOTICE_DISMISSED, true);
-    }
-
-    private static ChromeActivity getChromeActivity() {
-        for (Activity ref : ApplicationStatus.getRunningActivities()) {
-            if (!(ref instanceof ChromeActivity)) continue;
-            return (ChromeActivity) ref;
-        }
-        return null;
     }
 }

@@ -13,8 +13,7 @@ import org.chromium.base.ContextUtils;
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.Log;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.util.TabUtils;
-import org.chromium.chrome.browser.ChromeActivity;
+import org.chromium.chrome.browser.BraveActivity;
 import org.chromium.chrome.browser.infobar.InfoBarIdentifier;
 import org.chromium.chrome.browser.preferences.BravePref;
 import org.chromium.chrome.browser.preferences.BravePrefServiceBridge;
@@ -47,7 +46,7 @@ public class BraveSyncInformers {
     }
 
     public static void showSyncV1WillBeDeprecated() {
-        ChromeActivity activity = TabUtils.getChromeActivity();
+        BraveActivity activity = BraveActivity.getBraveActivity();
         if (activity == null) return;
 
         Tab tab = activity.getActivityTabProvider().get();

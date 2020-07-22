@@ -68,10 +68,12 @@ enum BravePrepopulatedEngineID : unsigned int {
   PREPOPULATED_ENGINE_ID_YAHOO_HK,
   PREPOPULATED_ENGINE_ID_YAHOO_ID,
   PREPOPULATED_ENGINE_ID_YAHOO_IN,
+  PREPOPULATED_ENGINE_ID_YAHOO_IT,
   PREPOPULATED_ENGINE_ID_YAHOO_JP,
   PREPOPULATED_ENGINE_ID_YAHOO_MX,
   PREPOPULATED_ENGINE_ID_YAHOO_MY,
   PREPOPULATED_ENGINE_ID_YAHOO_NL,
+  PREPOPULATED_ENGINE_ID_YAHOO_NO,
   PREPOPULATED_ENGINE_ID_YAHOO_NZ,
   PREPOPULATED_ENGINE_ID_YAHOO_PE,
   PREPOPULATED_ENGINE_ID_YAHOO_PH,
@@ -113,10 +115,12 @@ extern const PrepopulatedEngine brave_yahoo_fr;
 extern const PrepopulatedEngine brave_yahoo_hk;
 extern const PrepopulatedEngine brave_yahoo_id;
 extern const PrepopulatedEngine brave_yahoo_in;
+extern const PrepopulatedEngine brave_yahoo_it;
 extern const PrepopulatedEngine brave_yahoo_jp;
 extern const PrepopulatedEngine brave_yahoo_mx;
 extern const PrepopulatedEngine brave_yahoo_my;
 extern const PrepopulatedEngine brave_yahoo_nl;
+extern const PrepopulatedEngine brave_yahoo_no;
 extern const PrepopulatedEngine brave_yahoo_nz;
 extern const PrepopulatedEngine brave_yahoo_pe;
 extern const PrepopulatedEngine brave_yahoo_ph;

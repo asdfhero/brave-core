@@ -1,0 +1,20 @@
+diff --git a/chrome/browser/resources/settings/privacy_page/security_page.html b/chrome/browser/resources/settings/privacy_page/security_page.html
+index b228c2eaf46714cc9165bf84bddf7612f0d8ea38..37c7cda9123d9242009d6c3e88d1ba43aca30b16 100644
+--- a/chrome/browser/resources/settings/privacy_page/security_page.html
++++ b/chrome/browser/resources/settings/privacy_page/security_page.html
+@@ -125,6 +125,7 @@
+             </div>
+           </div>
+           <div slot="noSelectionCollapse">
++<if expr="_google_chrome">
+             <settings-toggle-button id="safeBrowsingReportingToggle"
+                 pref="{{prefs.safebrowsing.scout_reporting_enabled}}"
+                 label="$i18n{safeBrowsingStandardReportingLabel}"
+@@ -138,6 +139,7 @@
+                 prefs="{{prefs}}"
+                 sync-status="[[syncStatus]]">
+             </settings-passwords-leak-detection-toggle>
++</if>
+           </div>
+         </settings-collapse-radio-button>
+         <settings-collapse-radio-button id="safeBrowsingDisabled" no-collapse
